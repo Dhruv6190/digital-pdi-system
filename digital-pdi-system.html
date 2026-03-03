@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Digital PDI System</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #F8FAFC; color: #1E293B; min-height: 100vh; }
+
+  /* HEADER */
+  header { background: #1E293B; color: white; padding: 0 32px; }
+  .header-top { display: flex; justify-content: space-between; align-items: center; padding: 18px 0 14px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-icon { width: 38px; height: 38px; background: #3B82F6; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .brand-title { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .brand-sub { font-size: 12px; color: #94A3B8; margin-top: 2px; }
+  .user-badge { display: flex; align-items: center; gap: 10px; background: #334155; border-radius: 8px; padding: 7px 14px; }
+  .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: #3B82F6; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+  .user-name { font-size: 13px; font-weight: 600; }
+  .user-role { font-size: 11px; color: #94A3B8; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; }
+  .tab-btn { padding: 10px 18px; border: none; cursor: pointer; border-bottom: 2px solid transparent; background: transparent; color: #94A3B8; font-weight: 400; font-size: 14px; display: flex; align-items: center; gap: 6px; transition: all 0.15s; }
+  .tab-btn.active { color: #3B82F6; border-bottom-color: #3B82F6; font-weight: 600; }
+  .tab-btn:hover { color: #CBD5E1; }
+
+  /* CONTENT */
+  .content { max-width: 1200px; margin: 0 auto; padding: 28px 32px; }
+  .section-title { font-size: 20px; font-weight: 700; color: #1E293B; }
+  .section-sub { font-size: 14px; color: #64748B; margin-top: 4px; margin-bottom: 20px; }
+
+  /* FILTERS */
+  .filters { display: flex; gap: 12px; margin-bottom: 20px; }
+  .search-wrap { position: relative; flex: 1; }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 15px; color: #94A3B8; pointer-events: none; }
+  .search-input { width: 100%; padding: 10px 12px 10px 38px; border: 1px solid #E2E8F0; border-radius: 8px; font-size: 14px; background: white; outline: none; color: #1E293B; }
+  .search-input:focus { border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+  .filter-select { padding: 10px 14px; border: 1px solid #E2E8F0; border-radius: 8px; font-size: 14px; background: white; color: #1E293B; outline: none; cursor: pointer; }
+
+  /* CARD */
+  .card { background: white; border-radius: 12px; border: 1px solid #E2E8F0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .card-header { padding: 16px 20px; border-bottom: 1px solid #F1F5F9; }
+  .card-title { font-size: 15px; font-weight: 600; color: #1E293B; }
+  .card-desc { font-size: 13px; color: #94A3B8; margin-top: 3px; }
+
+  /* TABLE */
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: #F8FAFC; }
+  th { padding: 11px 16px; text-align: left; font-size: 12px; font-weight: 600; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+  tbody tr { border-top: 1px solid #F1F5F9; transition: background 0.1s; }
+  tbody tr:hover { background: #F0F9FF; }
+  td { padding: 13px 16px; font-size: 14px; }
+  .td-id { font-weight: 600; color: #3B82F6; }
+  .td-name { font-weight: 500; color: #1E293B; }
+  .td-muted { color: #64748B; }
+  .empty-row td { padding: 40px; text-align: center; color: #94A3B8; font-size: 14px; }
+
+  /* BADGE */
+  .badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .badge-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .badge-pending { background: #FFF7ED; color: #C2410C; }
+  .badge-pending .badge-dot { background: #F97316; }
+  .badge-submitted { background: #EFF6FF; color: #1D4ED8; }
+  .badge-submitted .badge-dot { background: #3B82F6; }
+  .badge-reviewed { background: #F0FDF4; color: #15803D; }
+  .badge-reviewed .badge-dot { background: #22C55E; }
+  .badge-completed { background: #F5F3FF; color: #6D28D9; }
+  .badge-completed .badge-dot { background: #8B5CF6; }
+  .badge-high { background: #FEF2F2; color: #DC2626; }
+  .badge-high .badge-dot { background: #EF4444; }
+  .badge-medium { background: #FFFBEB; color: #D97706; }
+  .badge-medium .badge-dot { background: #F59E0B; }
+  .badge-low { background: #F0FDF4; color: #15803D; }
+  .badge-low .badge-dot { background: #22C55E; }
+  .badge-open { background: #FEF2F2; color: #DC2626; }
+  .badge-open .badge-dot { background: #EF4444; }
+  .badge-inprogress { background: #FFF7ED; color: #C2410C; }
+  .badge-inprogress .badge-dot { background: #F97316; }
+  .badge-resolved { background: #F0FDF4; color: #15803D; }
+  .badge-resolved .badge-dot { background: #22C55E; }
+
+  /* BUTTONS */
+  .btn-select { padding: 6px 16px; background: #3B82F6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background 0.15s; }
+  .btn-select:hover { background: #2563EB; }
+  .completed-text { font-size: 13px; color: #94A3B8; font-style: italic; }
+
+  /* DASHBOARD STATS */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: white; border-radius: 12px; padding: 20px 24px; border: 1px solid #E2E8F0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  .stat-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .stat-label { font-size: 13px; color: #64748B; margin-bottom: 6px; }
+  .stat-value { font-size: 32px; font-weight: 700; color: #1E293B; }
+  .stat-icon { font-size: 26px; }
+  .stat-bar-bg { height: 4px; background: #F1F5F9; border-radius: 2px; margin-top: 12px; }
+  .stat-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+
+  /* DISTRIBUTION */
+  .dist-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .dist-label { width: 90px; font-size: 13px; color: #64748B; }
+  .dist-track { flex: 1; height: 10px; background: #F1F5F9; border-radius: 5px; overflow: hidden; }
+  .dist-fill { height: 100%; border-radius: 5px; transition: width 0.4s; }
+  .dist-count { width: 20px; font-size: 13px; font-weight: 600; color: #1E293B; }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); align-items: center; justify-content: center; z-index: 1000; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: white; border-radius: 16px; padding: 32px; width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+  .modal h2 { font-size: 18px; font-weight: 700; color: #1E293B; margin-bottom: 6px; }
+  .modal p { font-size: 14px; color: #64748B; margin-bottom: 24px; }
+  .modal-info { background: #F8FAFC; border-radius: 10px; padding: 14px 18px; margin-bottom: 24px; }
+  .modal-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 14px; }
+  .modal-row span:first-child { color: #64748B; }
+  .modal-row span:last-child { font-weight: 600; color: #1E293B; }
+  .modal-actions { display: flex; gap: 10px; }
+  .btn-cancel { flex: 1; padding: 10px 0; border: 1px solid #E2E8F0; border-radius: 8px; background: white; color: #64748B; cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.1s; }
+  .btn-cancel:hover { background: #F8FAFC; }
+  .btn-submit { flex: 1; padding: 10px 0; border: none; border-radius: 8px; background: #3B82F6; color: white; cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.15s; }
+  .btn-submit:hover { background: #2563EB; }
+
+  /* TAB PANELS */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  @media (max-width: 768px) {
+    header, .content { padding-left: 16px; padding-right: 16px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .filters { flex-direction: column; }
+    .modal { width: 90%; }
+    table { font-size: 13px; }
+    th, td { padding: 10px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-top">
+    <div class="brand">
+      <div class="brand-icon">⚙️</div>
+      <div>
+        <div class="brand-title">Digital PDI System</div>
+        <div class="brand-sub">Pre-Dispatch Inspection Management</div>
+      </div>
+    </div>
+    <div class="user-badge">
+      <div class="user-avatar">I</div>
+      <div>
+        <div class="user-name">Inspector</div>
+        <div class="user-role">Field Agent</div>
+      </div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('pdi', this)">🔍 PDI Management</button>
+    <button class="tab-btn" onclick="switchTab('bugs', this)">🐛 Bug Tracker</button>
+    <button class="tab-btn" onclick="switchTab('dashboard', this)">📊 Dashboard</button>
+  </div>
+</header>
+
+<div class="content">
+
+  <!-- PDI TAB -->
+  <div id="tab-pdi" class="tab-panel active">
+    <div class="section-title">PDI Selection & Filters</div>
+    <div class="section-sub">Search and filter PDIs to begin inspection process</div>
+
+    <div class="filters">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" id="searchInput" type="text" placeholder="Search by PDI ID, product, or inspector..." oninput="renderPDITable()" />
+      </div>
+      <select class="filter-select" id="statusFilter" onchange="renderPDITable()">
+        <option value="All">All Statuses</option>
+        <option value="Pending">Pending</option>
+        <option value="Submitted">Submitted</option>
+        <option value="Reviewed">Reviewed</option>
+        <option value="Completed">Completed</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Available PDIs</div>
+        <div class="card-desc">Select a PDI to begin the inspection process</div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>PDI ID</th><th>Product Name</th><th>Category</th>
+              <th>Date</th><th>Inspector</th><th>Status</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="pdiTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUG TRACKER TAB -->
+  <div id="tab-bugs" class="tab-panel">
+    <div class="section-title">Bug Tracker</div>
+    <div class="section-sub">Track and manage system issues and bug reports</div>
+    <div class="card">
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Bug ID</th><th>Title</th><th>Severity</th>
+              <th>Reporter</th><th>Date</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="bugTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD TAB -->
+  <div id="tab-dashboard" class="tab-panel">
+    <div class="section-title">Dashboard</div>
+    <div class="section-sub">Overview of PDI inspection activity</div>
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">PDI Status Distribution</div>
+      </div>
+      <div style="padding: 20px 24px;" id="distChart"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2>Begin Inspection</h2>
+    <p>You are about to start the inspection for:</p>
+    <div class="modal-info" id="modalInfo"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-submit" onclick="submitInspection()">Submit Inspection</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── DATA ──────────────────────────────────────────────────────
+  let pdis = [
+    { id: "12345", product: "AKAT Gate",          category: "Gates",           date: "2025-08-03", inspector: "John Doe",    status: "Pending"   },
+    { id: "12346", product: "BHEL Valve",          category: "Valves",          date: "2025-08-04", inspector: "Jane Smith",  status: "Submitted" },
+    { id: "12347", product: "L&T Transformer",     category: "Transformers",    date: "2025-08-05", inspector: "Mike Johnson",status: "Reviewed"  },
+    { id: "12348", product: "Siemens Switch",      category: "Switches",        date: "2025-08-06", inspector: "Sarah Wilson",status: "Pending"   },
+    { id: "12349", product: "ABB Circuit Breaker", category: "Circuit Breakers",date: "2025-08-07", inspector: "Tom Brown",   status: "Pending"   },
+  ];
+
+  const bugs = [
+    { id: "BUG-001", title: "Status not updating after submission", severity: "High",   reporter: "Jane Smith",  date: "2025-08-02", status: "Open"        },
+    { id: "BUG-002", title: "Date filter not working correctly",    severity: "Medium", reporter: "John Doe",    date: "2025-08-03", status: "In Progress"  },
+    { id: "BUG-003", title: "PDF export missing inspector name",    severity: "Low",    reporter: "Mike Johnson",date: "2025-08-04", status: "Resolved"     },
+  ];
+
+  let selectedPDI = null;
+
+  // ── BADGE HELPERS ─────────────────────────────────────────────
+  function statusBadge(status) {
+    const map = { Pending:"pending", Submitted:"submitted", Reviewed:"reviewed", Completed:"completed" };
+    const cls = map[status] || "pending";
+    return `<span class="badge badge-${cls}"><span class="badge-dot"></span>${status}</span>`;
+  }
+  function severityBadge(sev) {
+    const map = { High:"high", Medium:"medium", Low:"low" };
+    const cls = map[sev] || "low";
+    return `<span class="badge badge-${cls}"><span class="badge-dot"></span>${sev}</span>`;
+  }
+  function bugStatusBadge(s) {
+    const map = { "Open":"open", "In Progress":"inprogress", "Resolved":"resolved" };
+    const cls = map[s] || "open";
+    return `<span class="badge badge-${cls}"><span class="badge-dot"></span>${s}</span>`;
+  }
+
+  // ── PDI TABLE ─────────────────────────────────────────────────
+  function renderPDITable() {
+    const search = document.getElementById("searchInput").value.toLowerCase();
+    const filter = document.getElementById("statusFilter").value;
+    const filtered = pdis.filter(p => {
+      const matchS = p.product.toLowerCase().includes(search) || p.id.includes(search) || p.inspector.toLowerCase().includes(search);
+      const matchF = filter === "All" || p.status === filter;
+      return matchS && matchF;
+    });
+    const tbody = document.getElementById("pdiTableBody");
+    if (!filtered.length) {
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="7">No PDIs match your search.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = filtered.map((p, i) => `
+      <tr style="background:${i%2===0?'white':'#FAFAFA'}">
+        <td class="td-id">${p.id}</td>
+        <td class="td-name">${p.product}</td>
+        <td class="td-muted">${p.category}</td>
+        <td class="td-muted">${p.date}</td>
+        <td class="td-muted">${p.inspector}</td>
+        <td>${statusBadge(p.status)}</td>
+        <td>${p.status === "Reviewed"
+          ? `<span class="completed-text">Completed</span>`
+          : `<button class="btn-select" onclick="openModal('${p.id}')">Select</button>`
+        }</td>
+      </tr>
+    `).join("");
+  }
+
+  // ── BUG TABLE ─────────────────────────────────────────────────
+  function renderBugTable() {
+    document.getElementById("bugTableBody").innerHTML = bugs.map((b, i) => `
+      <tr style="background:${i%2===0?'white':'#FAFAFA'}">
+        <td class="td-id">${b.id}</td>
+        <td class="td-name">${b.title}</td>
+        <td>${severityBadge(b.severity)}</td>
+        <td class="td-muted">${b.reporter}</td>
+        <td class="td-muted">${b.date}</td>
+        <td>${bugStatusBadge(b.status)}</td>
+      </tr>
+    `).join("");
+  }
+
+  // ── DASHBOARD ─────────────────────────────────────────────────
+  function renderDashboard() {
+    const total     = pdis.length;
+    const pending   = pdis.filter(p => p.status === "Pending").length;
+    const submitted = pdis.filter(p => p.status === "Submitted").length;
+    const reviewed  = pdis.filter(p => p.status === "Reviewed").length;
+
+    const stats = [
+      { label: "Total PDIs", value: total,     icon: "📋", color: "#3B82F6", pct: 100 },
+      { label: "Pending",    value: pending,   icon: "⏳", color: "#F97316", pct: (pending/total)*100 },
+      { label: "Submitted",  value: submitted, icon: "📤", color: "#3B82F6", pct: (submitted/total)*100 },
+      { label: "Reviewed",   value: reviewed,  icon: "✅", color: "#22C55E", pct: (reviewed/total)*100 },
+    ];
+    document.getElementById("statsGrid").innerHTML = stats.map(s => `
+      <div class="stat-card">
+        <div class="stat-top">
+          <div>
+            <div class="stat-label">${s.label}</div>
+            <div class="stat-value">${s.value}</div>
+          </div>
+          <div class="stat-icon">${s.icon}</div>
+        </div>
+        <div class="stat-bar-bg">
+          <div class="stat-bar-fill" style="width:${s.pct}%;background:${s.color}"></div>
+        </div>
+      </div>
+    `).join("");
+
+    const dist = [
+      { label: "Pending",   count: pending,   color: "#F97316" },
+      { label: "Submitted", count: submitted, color: "#3B82F6" },
+      { label: "Reviewed",  count: reviewed,  color: "#22C55E" },
+    ];
+    document.getElementById("distChart").innerHTML = dist.map(d => `
+      <div class="dist-row">
+        <div class="dist-label">${d.label}</div>
+        <div class="dist-track">
+          <div class="dist-fill" style="width:${(d.count/total)*100}%;background:${d.color}"></div>
+        </div>
+        <div class="dist-count">${d.count}</div>
+      </div>
+    `).join("");
+  }
+
+  // ── TABS ──────────────────────────────────────────────────────
+  function switchTab(name, btn) {
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.getElementById("tab-" + name).classList.add("active");
+    btn.classList.add("active");
+    if (name === "dashboard") renderDashboard();
+  }
+
+  // ── MODAL ─────────────────────────────────────────────────────
+  function openModal(id) {
+    selectedPDI = pdis.find(p => p.id === id);
+    if (!selectedPDI) return;
+    document.getElementById("modalInfo").innerHTML = [
+      ["PDI ID",    selectedPDI.id],
+      ["Product",   selectedPDI.product],
+      ["Category",  selectedPDI.category],
+      ["Inspector", selectedPDI.inspector],
+      ["Date",      selectedPDI.date],
+    ].map(([k, v]) => `
+      <div class="modal-row"><span>${k}</span><span>${v}</span></div>
+    `).join("");
+    document.getElementById("modalOverlay").classList.add("open");
+  }
+
+  function closeModal() {
+    document.getElementById("modalOverlay").classList.remove("open");
+    selectedPDI = null;
+  }
+
+  function submitInspection() {
+    if (!selectedPDI) return;
+    pdis = pdis.map(p => p.id === selectedPDI.id ? { ...p, status: "Submitted" } : p);
+    closeModal();
+    renderPDITable();
+  }
+
+  // Close modal on overlay click
+  document.getElementById("modalOverlay").addEventListener("click", function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // ── INIT ──────────────────────────────────────────────────────
+  renderPDITable();
+  renderBugTable();
+</script>
+</body>
+</html>
